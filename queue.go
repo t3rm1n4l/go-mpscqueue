@@ -14,6 +14,7 @@ var dummy = unsafe.Pointer(&Node{})
 type SPMCQueue struct {
 	head unsafe.Pointer
 	tail unsafe.Pointer
+	size int64
 }
 
 func New() *SPMCQueue {
@@ -29,6 +30,7 @@ repeat:
 	}
 
 	(*Node)(prev).next = n
+	atomic.AddInt64(&q.size, 1)
 
 }
 
@@ -37,6 +39,7 @@ repeat:
 	tail := (*Node)(q.tail)
 	if tail.next != nil {
 		q.tail = tail.next
+		atomic.AddInt64(&q.size, -1)
 		return (*Node)(q.tail).v
 	}
 
@@ -44,4 +47,8 @@ repeat:
 	goto repeat
 
 	return nil
+}
+
+func (q *SPMCQueue) Size() int64 {
+	return atomic.LoadInt64(&q.size)
 }
