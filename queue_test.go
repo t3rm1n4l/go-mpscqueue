@@ -1,4 +1,4 @@
-package spmc
+package mpsc
 
 import "testing"
 import "sync"

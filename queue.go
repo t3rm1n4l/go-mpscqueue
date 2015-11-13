@@ -1,4 +1,4 @@
-package spmc
+package mpsc
 
 import "sync/atomic"
 import "unsafe"
@@ -11,17 +11,17 @@ type Node struct {
 
 var dummy = unsafe.Pointer(&Node{})
 
-type SPMCQueue struct {
+type MPSCQueue struct {
 	head unsafe.Pointer
 	tail unsafe.Pointer
 	size int64
 }
 
-func New() *SPMCQueue {
-	return &SPMCQueue{head: dummy, tail: dummy}
+func New() *MPSCQueue {
+	return &MPSCQueue{head: dummy, tail: dummy}
 }
 
-func (q *SPMCQueue) Push(v interface{}) {
+func (q *MPSCQueue) Push(v interface{}) {
 	n := unsafe.Pointer(&Node{v: v})
 repeat:
 	prev := atomic.LoadPointer(&q.head)
@@ -34,7 +34,7 @@ repeat:
 
 }
 
-func (q *SPMCQueue) Pop() interface{} {
+func (q *MPSCQueue) Pop() interface{} {
 repeat:
 	tail := (*Node)(q.tail)
 	if tail.next != nil {
@@ -49,6 +49,6 @@ repeat:
 	return nil
 }
 
-func (q *SPMCQueue) Size() int64 {
+func (q *MPSCQueue) Size() int64 {
 	return atomic.LoadInt64(&q.size)
 }
